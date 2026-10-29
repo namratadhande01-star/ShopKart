@@ -1,13 +1,19 @@
-import { Link, NavLink } from "react-router-dom";
+import { Link, NavLink, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import "./Navbar.css";
 
-function Navbar({ userName }) {
+function Navbar({ userName, cart = [] }) {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
 
     const toggleMenu = () => {
         setIsMenuOpen(!isMenuOpen);
     };
+    const navigate = useNavigate();
+    const cartCount = cart.reduce(
+        (total, item) =>
+            total + item.quantity,
+        0
+    );
 
     return (
         <>
@@ -40,6 +46,30 @@ function Navbar({ userName }) {
                             <li className="nav-item"><NavLink className="nav-link" to="/about"> About </NavLink></li>
                             <li className="nav-item"><NavLink className="nav-link" to="/contact"> Contact </NavLink></li>
                             <li className="nav-item"><NavLink className="nav-link" to="/cart"> Cart </NavLink></li>
+                            <li className="nav-item"><a
+                                className="nav-link"
+                                href="#trending"
+                                onClick={(e) => {
+                                    e.preventDefault();
+
+                                    if (window.location.pathname === "/") {
+                                        document.getElementById("trending")?.scrollIntoView({ behavior: "smooth" });
+                                    }
+
+                                    else {
+                                        navigate("/");
+
+                                        setTimeout(() => {
+                                            document.getElementById("trending")?.scrollIntoView({
+                                                behavior: "smooth"
+                                            });
+                                        }, 100);
+                                    }
+                                }}
+                            >
+                                Trending 🔥
+                            </a>
+                            </li>
                         </ul>
 
                         {/* Search */}
@@ -70,16 +100,12 @@ function Navbar({ userName }) {
                                     </button>
 
                                     <ul className="dropdown-menu account-menu">
-                                        <li><Link className="dropdown-item" to="/login"> Login </Link></li>
-                                        <li><Link className="dropdown-item" to="/register"> Register </Link></li>
+                                        <li><a className="dropdown-item" href="/login"> Login </a></li>
+                                        <li><a className="dropdown-item" href="/register"> Register </a></li>
                                     </ul>
                                 </div>
                             )}
                             <div className="dropdown account-dropdown">
-                                <button className="account-btn" type="button" data-bs-toggle="dropdown"
-                                    aria-expanded="false" aria-label="My Account">
-                                    <img src="/icons/profile-icon.png" alt="My Account" className="profile-icon" />
-                                </button>
 
                                 <ul className="dropdown-menu account-menu">
 

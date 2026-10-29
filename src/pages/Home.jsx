@@ -88,6 +88,7 @@ function Home() {
       image: "/images/products/lamp.png",
     },
   ];
+  
   return (
     <>
       {/* Hero Section */}

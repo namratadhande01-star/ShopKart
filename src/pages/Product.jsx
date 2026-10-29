@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import Navbar from "../components/Navbar";
 import "./Product.css";
 
 
@@ -161,7 +160,7 @@ const products = [
   }
 ];
 
-function Product() {
+function Product({ dispatch }) {
   const [selectedCategories, setSelectedCategories] = useState([]);
   const [maxPrice, setMaxPrice] = useState(20000);
   const [selectedRating, setSelectedRating] = useState(0);
@@ -362,7 +361,9 @@ function Product() {
                         ₹{product.price}
                         <del>₹{product.originalPrice}</del>
                       </div>
-                      <button className="add-cart-button">🛒 Add to Cart</button>
+                        <button className="add-cart-button" onClick={() => {
+                        dispatch({ type: "ADD_ITEM", payload: product });
+                      }}>🛒 Add to Cart</button>
                     </div>
                   </div>
                 ))

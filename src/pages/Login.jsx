@@ -68,7 +68,6 @@ function Login({ setUserName }) {
 
         </div>
       </div>
-      );
       
     </>
   )
