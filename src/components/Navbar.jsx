@@ -9,6 +9,7 @@ function Navbar({ userName, cart = [] }) {
         setIsMenuOpen(!isMenuOpen);
     };
     const navigate = useNavigate();
+
     const cartCount = cart.reduce(
         (total, item) =>
             total + item.quantity,
@@ -84,7 +85,9 @@ function Navbar({ userName, cart = [] }) {
 
                             <div className="cart-wrapper">
                                 <Link to="/cart" className="nav-icon">🛒</Link>
-                                <span className="cart-count">0</span>
+                                <span className="cart-count">
+                                    {cartCount}
+                                    </span>
                             </div>
                             {/* Account / Greeting */}
                             {userName ? (

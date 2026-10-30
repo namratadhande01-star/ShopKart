@@ -1,4 +1,4 @@
-        import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import "./Cart.css";
 
@@ -6,537 +6,565 @@ function Cart({ cart, dispatch }) {
     const navigate = useNavigate();
     const [orderPlaced, setOrderPlaced] = useState(false);
 
-        /* =========================================
-            CART CALCULATIONS
-         ========================================= */
+    /* =========================================
+        CART CALCULATIONS
+     ========================================= */
 
-        const subtotal = cart.reduce(
-            (total, item) =>
-                total +
-                Number(
-                    String(item.price).replace(/,/g, "")
-                ) * item.quantity,
-            0
+    const subtotal = cart.reduce(
+        (total, item) =>
+            total +
+            Number(
+                String(item.price).replace(/,/g, "")
+            ) * item.quantity,
+        0
+    );
+
+
+    /* =========================================
+       DISCOUNT LOGIC
+    ========================================= */
+
+    let discountPercentage = 0;
+
+    if (subtotal >= 5000) {
+        discountPercentage = 25;
+    } else if (subtotal >= 3500) {
+        discountPercentage = 20;
+    } else if (subtotal >= 2000) {
+        discountPercentage = 10;
+    }
+
+
+    const discount =
+        (subtotal * discountPercentage) / 100;
+
+
+    /* =========================================
+       SHIPPING LOGIC
+    ========================================= */
+
+    const shipping =
+        subtotal >= 499 || subtotal === 0
+            ? 0
+            : 40;
+
+
+    /* =========================================
+       FINAL TOTAL
+    ========================================= */
+
+    const totalAmount =
+        subtotal - discount + shipping;
+
+    const [cartLoaded, setCartLoaded] = useState(false);
+
+    useEffect(() => {
+        const savedCart = localStorage.getItem("cart");
+        if (savedCart) {
+            dispatch({
+                type: "LOAD_CART", payload: JSON.parse(savedCart)
+            });
+        }
+        setCartLoaded(true);
+    }, []);
+
+    useEffect(() => {
+
+        if (!cartLoaded) {
+
+            return;
+
+        }
+
+        localStorage.setItem(
+            "cart",
+            JSON.stringify(cart)
         );
 
 
-        /* =========================================
-           DISCOUNT LOGIC
-        ========================================= */
-
-        let discountPercentage = 0;
-
-        if (subtotal >= 5000) {
-            discountPercentage = 25;
-        } else if (subtotal >= 3500) {
-            discountPercentage = 20;
-        } else if (subtotal >= 2000) {
-            discountPercentage = 10;
-        }
+    }, [cart, cartLoaded]);
 
 
-        const discount =
-            (subtotal * discountPercentage) / 100;
+    return (
+        <div className="cart-page">
 
-
-        /* =========================================
-           SHIPPING LOGIC
-        ========================================= */
-
-        const shipping =
-            subtotal >= 499 || subtotal === 0
-                ? 0
-                : 40;
-
-
-        /* =========================================
-           FINAL TOTAL
-        ========================================= */
-
-        const totalAmount =
-            subtotal - discount + shipping;
-
-
-        return (
-            <div className="cart-page">
-
-                {/* =====================================
+            {/* =====================================
           EMPTY CART UI
       ===================================== */}
 
-                {cart.length === 0 ? (
+            {cart.length === 0 ? (
 
-                    <div className="empty-cart-container">
+                <div className="empty-cart-container">
 
-                        <div className="empty-cart-box">
+                    <div className="empty-cart-box">
 
-                            <div className="empty-cart-icon">
+                        <div className="empty-cart-icon">
 
-                                <img
-                                    src="/icons/cart-icon.png"
-                                    alt="Empty Cart"
-                                />
-
-                            </div>
-
-
-                            <h1>
-                                Your Cart is Empty
-                            </h1>
-
-
-                            <p>
-                                Looks like you haven't added
-                                anything to your cart yet.
-                            </p>
-
-
-                            <Link
-                                to="/product"
-                                className="empty-cart-btn"
-                            >
-                                Start Shopping
-                                <span>→</span>
-                            </Link>
+                            <img
+                                src="/icons/cart-icon.png"
+                                alt="Empty Cart"
+                            />
 
                         </div>
 
+
+                        <h1>
+                            Your Cart is Empty
+                        </h1>
+
+
+                        <p>
+                            Looks like you haven't added
+                            anything to your cart yet.
+                        </p>
+
+
+                        <Link
+                            to="/product"
+                            className="empty-cart-btn"
+                        >
+                            Start Shopping
+                            <span>→</span>
+                        </Link>
+
                     </div>
 
-                ) : (
+                </div>
 
-                    /* =====================================
-                       CART WITH PRODUCTS
-                    ===================================== */
+            ) : (
 
-                    <>
+                /* =====================================
+                   CART WITH PRODUCTS
+                ===================================== */
 
-                        <div className="cart-container">
+                <>
 
-                           { /* =================================
+                    <div className="cart-container">
+
+                        { /* =================================
                             CART TABLE
                             ================================= */}
 
-                            <div className="cart-table-wrapper">
+                        <div className="cart-table-wrapper">
 
-                                <table className="cart-table">
+                            <table className="cart-table">
 
-                                    <thead>
+                                <thead>
 
-                                        <tr>
-                                            <th>PRODUCT</th>
-                                            <th>PRICE</th>
-                                            <th>QUANTITY</th>
-                                            <th>TOTAL</th>
-                                            <th>ACTION</th>
-                                        </tr>
+                                    <tr>
+                                        <th>PRODUCT</th>
+                                        <th>PRICE</th>
+                                        <th>QUANTITY</th>
+                                        <th>TOTAL</th>
+                                        <th>ACTION</th>
+                                    </tr>
 
-                                    </thead>
-
-
-                                    <tbody>
-
-                                        {cart.map((item) => (
-
-                                            <tr
-                                                className="cart-item-row"
-                                                key={item.id}
-                                            >
-
-                                                {/* PRODUCT */}
-
-                                                <td>
-
-                                                    <div className="cart-product">
-
-                                                        <div className="cart-product-image">
-
-                                                            <img
-                                                                src={item.image}
-                                                                alt={item.name}
-                                                            />
-
-                                                        </div>
+                                </thead>
 
 
-                                                        <div className="cart-product-info">
+                                <tbody>
 
-                                                            <h3>
-                                                                {item.name}
-                                                            </h3>
+                                    {cart.map((item) => (
 
-                                                            <p className="cart-category">
-                                                                {item.category}
-                                                            </p>
+                                        <tr
+                                            className="cart-item-row"
+                                            key={item.id}
+                                        >
 
-                                                        </div>
+                                            {/* PRODUCT */}
+
+                                            <td>
+
+                                                <div className="cart-product">
+
+                                                    <div className="cart-product-image">
+
+                                                        <img
+                                                            src={item.image}
+                                                            alt={item.name}
+                                                        />
 
                                                     </div>
 
-                                                </td>
 
+                                                    <div className="cart-product-info">
 
-                                                {/* PRICE */}
+                                                        <h3>
+                                                            {item.name}
+                                                        </h3>
 
-                                                <td>
-
-                                                    <div className="cart-price">
-
-                                                        <strong>
-                                                            ₹
-                                                            {Number(
-                                                                String(item.price)
-                                                                    .replace(/,/g, "")
-                                                            ).toLocaleString("en-IN")}
-                                                        </strong>
-
-                                                        <span className="original-price">
-                                                            ₹
-                                                            {Number(
-                                                                String(item.originalPrice)
-                                                                    .replace(/,/g, "")
-                                                            ).toLocaleString("en-IN")}
-                                                        </span>
+                                                        <p className="cart-category">
+                                                            {item.category}
+                                                        </p>
 
                                                     </div>
 
-                                                </td>
+                                                </div>
+
+                                            </td>
 
 
-                                                {/* QUANTITY */}
+                                            {/* PRICE */}
 
-                                                <td>
+                                            <td>
 
-                                                    <div className="quantity-control">
+                                                <div className="cart-price">
 
-                                                        <button
-                                                            type="button"
-                                                            onClick={() =>
-                                                                dispatch({
-                                                                    type: "DECREASE_QUANTITY",
-                                                                    payload: item.id
-                                                                })
-                                                            }
-                                                        >
-                                                            −
-                                                        </button>
-
-
-                                                        <span>
-                                                            {item.quantity}
-                                                        </span>
-
-
-                                                        <button
-                                                            type="button"
-                                                            onClick={() =>
-                                                                dispatch({
-                                                                    type: "INCREASE_QUANTITY",
-                                                                    payload: item.id
-                                                                })
-                                                            }
-                                                        >
-                                                            +
-                                                        </button>
-
-                                                    </div>
-
-                                                </td>
-
-
-                                                {/* ITEM TOTAL */}
-
-                                                <td>
-
-                                                    <strong className="item-total">
-
+                                                    <strong>
                                                         ₹
-                                                        {(
-                                                            Number(
-                                                                String(item.price)
-                                                                    .replace(/,/g, "")
-                                                            ) *
-                                                            item.quantity
+                                                        {Number(
+                                                            String(item.price)
+                                                                .replace(/,/g, "")
                                                         ).toLocaleString("en-IN")}
-
                                                     </strong>
 
-                                                </td>
+                                                    <span className="original-price">
+                                                        ₹
+                                                        {Number(
+                                                            String(item.originalPrice)
+                                                                .replace(/,/g, "")
+                                                        ).toLocaleString("en-IN")}
+                                                    </span>
+
+                                                </div>
+
+                                            </td>
 
 
-                                                {/* DELETE */}
+                                            {/* QUANTITY */}
 
-                                                <td>
+                                            <td>
+
+                                                <div className="quantity-control">
 
                                                     <button
                                                         type="button"
-                                                        className="delete-btn"
                                                         onClick={() =>
                                                             dispatch({
-                                                                type: "REMOVE_ITEM",
+                                                                type: "DECREASE_QUANTITY",
                                                                 payload: item.id
                                                             })
                                                         }
                                                     >
-
-                                                        <img
-                                                            src="/icons/delete-icon.png"
-                                                            alt="Delete"
-                                                        />
-
+                                                        −
                                                     </button>
 
-                                                </td>
 
-                                            </tr>
-
-                                        ))}
-
-                                    </tbody>
-
-                                </table>
+                                                    <span>
+                                                        {item.quantity}
+                                                    </span>
 
 
-                                {/* CLEAR CART */}
+                                                    <button
+                                                        type="button"
+                                                        onClick={() =>
+                                                            dispatch({
+                                                                type: "INCREASE_QUANTITY",
+                                                                payload: item.id
+                                                            })
+                                                        }
+                                                    >
+                                                        +
+                                                    </button>
 
-                                <div className="cart-footer">
+                                                </div>
 
-                                    <button
-                                        type="button"
-                                        className="clear-cart-btn"
-                                        onClick={() =>
-                                            dispatch({
-                                                type: "CLEAR_CART"
-                                            })
-                                        }
-                                    >
+                                            </td>
 
-                                        <img
-                                            src="/icons/clear-cart.png"
-                                            alt=""
-                                        />
 
-                                        Clear Cart
+                                            {/* ITEM TOTAL */}
 
-                                    </button>
+                                            <td>
 
-                                </div>
+                                                <strong className="item-total">
+
+                                                    ₹
+                                                    {(
+                                                        Number(
+                                                            String(item.price)
+                                                                .replace(/,/g, "")
+                                                        ) *
+                                                        item.quantity
+                                                    ).toLocaleString("en-IN")}
+
+                                                </strong>
+
+                                            </td>
+
+
+                                            {/* DELETE */}
+
+                                            <td>
+
+                                                <button
+                                                    type="button"
+                                                    className="delete-btn"
+                                                    onClick={() =>
+                                                        dispatch({
+                                                            type: "REMOVE_ITEM",
+                                                            payload: item.id
+                                                        })
+                                                    }
+                                                >
+
+                                                    <img
+                                                        src="/icons/delete-icon.png"
+                                                        alt="Delete"
+                                                    />
+
+                                                </button>
+
+                                            </td>
+
+                                        </tr>
+
+                                    ))}
+
+                                </tbody>
+
+                            </table>
+
+
+                            {/* CLEAR CART */}
+
+                            <div className="cart-footer">
+
+                                <button
+                                    type="button"
+                                    className="clear-cart-btn"
+                                    onClick={() =>
+                                        dispatch({
+                                            type: "CLEAR_CART"
+                                        })
+                                    }
+                                >
+
+                                    <img
+                                        src="/icons/clear-cart.png"
+                                        alt=""
+                                    />
+
+                                    Clear Cart
+
+                                </button>
 
                             </div>
 
+                        </div>
 
-                            {/* =================================
+
+                        {/* =================================
                 ORDER SUMMARY
             ================================= */}
 
-                            <aside className="cart-sidebar">
+                        <aside className="cart-sidebar">
 
-                                <div className="order-summary">
+                            <div className="order-summary">
 
-                                    <h2>
-                                        Order Summary
-                                    </h2>
-
-
-                                    <div className="summary-row">
-
-                                        <span>
-                                            Subtotal ({cart.length} items)
-                                        </span>
-
-                                        <span>
-                                            ₹{subtotal.toLocaleString("en-IN")}
-                                        </span>
-
-                                    </div>
+                                <h2>
+                                    Order Summary
+                                </h2>
 
 
-                                    <div className="summary-row discount-row">
+                                <div className="summary-row">
 
-                                        <span>
-                                            Discount ({discountPercentage}%)
-                                        </span>
+                                    <span>
+                                        Subtotal ({cart.length} items)
+                                    </span>
 
-                                        <span>
-                                            −₹{discount.toLocaleString("en-IN")}
-                                        </span>
-
-                                    </div>
-
-
-                                    <div className="summary-row">
-
-                                        <span>
-                                            Shipping
-                                        </span>
-
-                                        <span className="free-shipping">
-
-                                            {shipping === 0
-                                                ? "FREE"
-                                                : `₹${shipping.toLocaleString("en-IN")}`}
-
-                                        </span>
-
-                                    </div>
-
-
-                                    <div className="summary-divider"></div>
-
-
-                                    <div className="summary-total">
-
-                                        <span>
-                                            Total Amount
-                                        </span>
-
-                                        <strong>
-                                            ₹{totalAmount.toLocaleString("en-IN")}
-                                        </strong>
-
-                                    </div>
-
-
-                                    <p className="saved-message">
-
-                                        You saved ₹
-                                        {discount.toLocaleString("en-IN")}
-                                        {" "}on this order
-
-                                    </p>
-
-
-                                    {/* CHECKOUT */}
-
-                                    <button
-                                        type="button"
-                                        className="checkout-btn"
-                                        onClick={() =>
-                                            setOrderPlaced(true)}
-                                    >
-
-                                        Proceed to Checkout
-
-                                        <span>
-                                            →
-                                        </span>
-
-                                    </button>
-
-
-                                    {/* COUPON */}
-
-                                    <button
-                                        type="button"
-                                        className="coupon-btn"
-                                    >
-
-                                        <img
-                                            src="/icons/coupon.png"
-                                            alt=""
-                                        />
-
-                                        Apply Coupon
-
-                                    </button>
+                                    <span>
+                                        ₹{subtotal.toLocaleString("en-IN")}
+                                    </span>
 
                                 </div>
 
 
-                                {/* SECURE PAYMENT */}
+                                <div className="summary-row discount-row">
 
-                                <div className="secure-box">
+                                    <span>
+                                        Discount ({discountPercentage}%)
+                                    </span>
+
+                                    <span>
+                                        −₹{discount.toLocaleString("en-IN")}
+                                    </span>
+
+                                </div>
+
+
+                                <div className="summary-row">
+
+                                    <span>
+                                        Shipping
+                                    </span>
+
+                                    <span className="free-shipping">
+
+                                        {shipping === 0
+                                            ? "FREE"
+                                            : `₹${shipping.toLocaleString("en-IN")}`}
+
+                                    </span>
+
+                                </div>
+
+
+                                <div className="summary-divider"></div>
+
+
+                                <div className="summary-total">
+
+                                    <span>
+                                        Total Amount
+                                    </span>
+
+                                    <strong>
+                                        ₹{totalAmount.toLocaleString("en-IN")}
+                                    </strong>
+
+                                </div>
+
+
+                                <p className="saved-message">
+
+                                    You saved ₹
+                                    {discount.toLocaleString("en-IN")}
+                                    {" "}on this order
+
+                                </p>
+
+
+                                {/* CHECKOUT */}
+
+                                <button
+                                    type="button"
+                                    className="checkout-btn"
+                                    onClick={() =>
+                                        setOrderPlaced(true)}
+                                >
+
+                                    Proceed to Checkout
+
+                                    <span>
+                                        →
+                                    </span>
+
+                                </button>
+
+
+                                {/* COUPON */}
+
+                                <button
+                                    type="button"
+                                    className="coupon-btn"
+                                >
 
                                     <img
-                                        src="/icons/security-icon.png"
+                                        src="/icons/coupon.png"
                                         alt=""
-                                        className="secure-icon"
                                     />
 
-                                    <div>
+                                    Apply Coupon
 
-                                        <h3>
-                                            Safe & Secure Payments
-                                        </h3>
+                                </button>
 
-                                        <p>
-                                            100% secure payments.
-                                            Easy returns.
-                                            Your data is protected.
-                                        </p>
-
-                                    </div>
-
-                                </div>
-
-                            </aside>
-
-                        </div>
-
-                    </>
-
-                )}
-
-
-                {/* =====================================
-          CONTINUE SHOPPING
-      ===================================== */}
-
-                <div className="cart-navigation">
-
-                    <Link
-                        to="/product"
-                        className="continue-shopping"
-                    >
-                        ← Continue Shopping
-                    </Link>
-
-                </div>
-
-
-                {/* =====================================
-          ORDER SUCCESS POPUP
-      ===================================== */}
-
-                {orderPlaced && (
-
-                    <div className="order-popup-overlay">
-
-                        <div className="order-popup">
-
-                            <div className="success-icon">
-                                ✓
                             </div>
 
 
-                            <h2>
-                                Order Placed Successfully!
-                            </h2>
+                            {/* SECURE PAYMENT */}
 
+                            <div className="secure-box">
 
-                            <p>
-                                Your order has been placed successfully.
-                            </p>
+                                <img
+                                    src="/icons/security-icon.png"
+                                    alt=""
+                                    className="secure-icon"
+                                />
 
+                                <div>
 
-                            <button
-                                type="button"
-                                className="popup-ok-btn"
-                                onClick={() =>
-                                    setOrderPlaced(false)
-                                }
-                            >
-                                OK
-                            </button>
+                                    <h3>
+                                        Safe & Secure Payments
+                                    </h3>
 
-                        </div>
+                                    <p>
+                                        100% secure payments.
+                                        Easy returns.
+                                        Your data is protected.
+                                    </p>
+
+                                </div>
+
+                            </div>
+
+                        </aside>
 
                     </div>
 
-                )}
+                </>
+
+            )}
+
+
+            {/* =====================================
+          CONTINUE SHOPPING
+      ===================================== */}
+
+            <div className="cart-navigation">
+
+                <Link
+                    to="/product"
+                    className="continue-shopping"
+                >
+                    ← Continue Shopping
+                </Link>
 
             </div>
-        );
+
+
+            {/* =====================================
+          ORDER SUCCESS POPUP
+      ===================================== */}
+
+            {orderPlaced && (
+
+                <div className="order-popup-overlay">
+
+                    <div className="order-popup">
+
+                        <div className="success-icon">
+                            ✓
+                        </div>
+
+
+                        <h2>
+                            Order Placed Successfully!
+                        </h2>
+
+
+                        <p>
+                            Your order has been placed successfully.
+                        </p>
+
+
+                        <button
+                            type="button"
+                            className="popup-ok-btn"
+                            onClick={() =>
+                                setOrderPlaced(false)
+                            }
+                        >
+                            OK
+                        </button>
+
+                    </div>
+
+                </div>
+
+            )}
+
+        </div>
+    );
 }
 
 export default Cart;
