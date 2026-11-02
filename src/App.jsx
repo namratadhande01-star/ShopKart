@@ -5,6 +5,9 @@ import Cart from "./pages/Cart";
 import Login from "./pages/Login";
 import Practice from "./pages/practice";
 import Register from "./pages/Register";
+import About from "./pages/About";
+import Contact from "./pages/Contact";
+import Footer from "./components/Footer";
 import React, { useState, useReducer } from "react";
 import Navbar from "./components/Navbar";
 
@@ -90,7 +93,10 @@ function App() {
         <Route path="/login" element={<Login setUserName={setUserName} />} />
         <Route path="/practice" element={<Practice />} />
         <Route path="/register" element={<Register setUserName={setUserName} />} />
+        <Route path="/about" element={<About />}/>
+        <Route path="/contact" element={<Contact />}/>
       </Routes>
+      <Footer />
     </>
   );
 }
