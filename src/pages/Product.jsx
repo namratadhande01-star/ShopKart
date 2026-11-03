@@ -1,5 +1,7 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import "./Product.css";
+import { useParams } from "react-router-dom";
 
 
 const products = [
@@ -165,6 +167,7 @@ function Product({ dispatch }) {
   const [maxPrice, setMaxPrice] = useState(20000);
   const [selectedRating, setSelectedRating] = useState(0);
   const [availability, setAvailability] = useState("");
+  const { fname, lname } = useParams();
 
   const handleCategoryChange = (category) => {
     if (selectedCategories.includes(category)) {
@@ -218,6 +221,7 @@ function Product({ dispatch }) {
         <section className="products-banner">
           <div className="banner-content">
             <h1> All <span>Products</span> </h1>
+            <h1>Hello {fname} {lname}</h1>
             <p> Explore our wide range of top quality products </p>
           </div>
         </section>
@@ -361,9 +365,7 @@ function Product({ dispatch }) {
                         ₹{product.price}
                         <del>₹{product.originalPrice}</del>
                       </div>
-                        <button className="add-cart-button" onClick={() => {
-                        dispatch({ type: "ADD_ITEM", payload: product });
-                      }}>🛒 Add to Cart</button>
+                      import {useNavigate} from "react-router-dom";
                     </div>
                   </div>
                 ))

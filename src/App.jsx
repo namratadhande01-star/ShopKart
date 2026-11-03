@@ -1,15 +1,18 @@
-import { Routes, Route, useNavigate } from 'react-router-dom';
+import { Routes, Route, useNavigate, useParams} from 'react-router-dom';
 import Home from "./pages/Home";
 import Product from "./pages/Product";
 import Cart from "./pages/Cart";
 import Login from "./pages/Login";
-import Practice from "./pages/practice";
+import Practice from "./pages/Practice";
 import Register from "./pages/Register";
 import About from "./pages/About";
 import Contact from "./pages/Contact";
-import Footer from "./components/Footer";
+import Footer from "./pages/Footer";
 import React, { useState, useReducer } from "react";
 import Navbar from "./components/Navbar";
+import ProductDetails from "./pages/ProductDetails";
+import NotFound from "./pages/NotFound";
+
 
 function cartReducer(state, action) {
 
@@ -89,12 +92,15 @@ function App() {
       <Routes>
         <Route path="/" element={<Home Student FullName="Gopal" Age={30} />} />
         <Route path="/product" element={<Product dispatch={dispatch}/>} />
+        <Route path="/product/:fname/:lname" element={<Product/>} />
         <Route path="/cart" element={<Cart cart={cart} dispatch={dispatch}/>} />
         <Route path="/login" element={<Login setUserName={setUserName} />} />
         <Route path="/practice" element={<Practice />} />
         <Route path="/register" element={<Register setUserName={setUserName} />} />
         <Route path="/about" element={<About />}/>
         <Route path="/contact" element={<Contact />}/>
+        <Route path="/product/:id" element={<ProductDetails dispatch={dispatch} />} />
+        <Route path="*" element={<NotFound />} />
       </Routes>
       <Footer />
     </>
