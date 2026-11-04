@@ -1,8 +1,10 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useContext } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import "./Cart.css";
+import { ShopKartContext } from "../Context/ShopKartContext";
 
-function Cart({ cart, dispatch }) {
+function Cart() {
+    const { cart, dispatch } = useContext(ShopKartContext);
     const navigate = useNavigate();
     const [orderPlaced, setOrderPlaced] = useState(false);
 
@@ -18,6 +20,7 @@ function Cart({ cart, dispatch }) {
             ) * item.quantity,
         0
     );
+
 
 
     /* =========================================
@@ -57,32 +60,6 @@ function Cart({ cart, dispatch }) {
         subtotal - discount + shipping;
 
     const [cartLoaded, setCartLoaded] = useState(false);
-
-    useEffect(() => {
-        const savedCart = localStorage.getItem("cart");
-        if (savedCart) {
-            dispatch({
-                type: "LOAD_CART", payload: JSON.parse(savedCart)
-            });
-        }
-        setCartLoaded(true);
-    }, []);
-
-    useEffect(() => {
-
-        if (!cartLoaded) {
-
-            return;
-
-        }
-
-        localStorage.setItem(
-            "cart",
-            JSON.stringify(cart)
-        );
-
-
-    }, [cart, cartLoaded]);
 
 
     return (

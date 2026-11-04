@@ -1,9 +1,13 @@
 import React from 'react'
+import { useContext } from "react";
 import { useForm } from "react-hook-form";
 import "./Register.css";
 import { useNavigate } from "react-router-dom";
+import { ShopKartContext } from "../Context/ShopKartContext";
 
-function Register({ setUserName }) {
+
+function Register() {
+  const { setUserName } = useContext(ShopKartContext);
   const { register, handleSubmit, formState: { errors } } = useForm();
   const navigate = useNavigate();
   const onSubmit = (data) => {

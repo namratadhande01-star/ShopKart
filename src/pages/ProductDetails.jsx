@@ -1,9 +1,12 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
-import productDetails from "../data/productDetails";
+import productDetails from "../data/ProductDetails";
 import "./ProductDetails.css";
+import { ShopKartContext } from "../Context/ShopKartContext";
 
-function ProductDetails({ dispatch }) {
+
+function ProductDetails() {
+    const { dispatch, productDetails } = useContext(ShopKartContext);
     const { id } = useParams();
     const navigate = useNavigate();
     const [quantity, setQuantity] = useState(1);
@@ -11,6 +14,24 @@ function ProductDetails({ dispatch }) {
     const product = productDetails.find(
         (item) => item.id === Number(id)
     );
+
+    if (!product) {
+        return (
+            <main className="product-not-found">
+
+                <h1>Product Not Found</h1>
+
+                <p> The product you are looking for does not exist. </p>
+
+                <Link to="/products">
+                    Back to Products
+                </Link>
+
+            </main>
+        );
+    }
+
+
 
     const handleAddToCart = () => {
 
@@ -31,7 +52,7 @@ function ProductDetails({ dispatch }) {
         }
         navigate("/cart");
     };
-    
+
     const formatKey = (key) => {
         return key
             .replace(/([A-Z])/g, " $1")
@@ -39,18 +60,9 @@ function ProductDetails({ dispatch }) {
                 letter.toUpperCase()
             );
     };
-    
-    if (!product) {
-        return (
-            <main className="product-not-found">
-                <h1>Product Not Found</h1>
-                <p> The product you are looking for does not exist. </p>
-                <Link to="/product">Back to Products</Link>
-            </main>
-        );
-    }
+
     return (
-        <div>
+        <>
             <section className="product-overview">
                 <div className="product-image-section">
                     <img src={product.image} alt={product.name} />
@@ -66,41 +78,44 @@ function ProductDetails({ dispatch }) {
                         <span>({product.reviews} reviews)</span>
                     </div>
                     <p className="product-short-description">{product.shortDescription}</p>
-                </div>
-                <div className="product-pricing">
-                    <span className="current-price">₹{product.price.toLocaleString("en-IN")}</span>
-                    <span className="original-price">₹{product.originalPrice.toLocaleString("en-IN")}
-                    </span>
-                    <span className="discount">{product.discount} OFF</span>
-                </div>
-                <div className="product-availability">
 
-                    <strong> {product.availability} </strong>
-                    <p>  Free delivery available on eligible orders. </p>
-
-                </div>
-                <div className="purchase-section">
-                    <div className="quantity-section">
-                        <span>Quantity</span>
-                        <div className="quantity-control">
-                            <button type="button" onClick={() =>
-                                setQuantity((previous) => Math.max(1, previous - 1))}>−</button>
-                            <span>{quantity}</span>
-                            <button type="button" onClick={() =>
-                                setQuantity((previous) => previous + 1)}>+</button>
-                        </div>
+                    <div className="product-pricing">
+                        <span className="current-price">₹{product.price.toLocaleString("en-IN")}</span>
+                        <span className="original-price">₹{product.originalPrice.toLocaleString("en-IN")}
+                        </span>
+                        <span className="discount">{product.discount} OFF</span>
                     </div>
+                    <div className="product-availability">
 
-                    <div className="purchase-buttons">
-                        <button className="add-cart-btn" onClick={handleAddToCart}>Add to Cart</button>
-                        <button className="buy-now-btn" onClick={handleBuyNow}>Buy Now</button>
+                        <strong> {product.availability} </strong>
+                        <p>  Free delivery available on eligible orders. </p>
+
+                    </div>
+                    <div className="purchase-section">
+                        <div className="quantity-section">
+                            <span>Quantity</span>
+                            <div className="quantity-control">
+                                <button type="button" onClick={() =>
+                                    setQuantity((previous) => Math.max(1, previous - 1))}>−</button>
+                                <span>{quantity}</span>
+                                <button type="button" onClick={() =>
+                                    setQuantity((previous) => previous + 1)}>+</button>
+                            </div>
+                        </div>
+
+                        <div className="purchase-buttons">
+                            <button className="add-cart-btn" onClick={handleAddToCart}>Add to Cart</button>
+                            <button className="buy-now-btn" onClick={handleBuyNow}>Buy Now</button>
+                        </div>
                     </div>
                 </div>
             </section>
+
             <section className="product-description-section">
                 <h2>Product Description</h2>
                 <p> {product.description} </p>
             </section>
+
             <section className="product-features-section">
 
                 <h2>Key Features</h2>
@@ -114,6 +129,7 @@ function ProductDetails({ dispatch }) {
                 </ul>
 
             </section>
+
             <section className="specifications-section">
 
                 <h2>Specifications</h2>
@@ -127,6 +143,7 @@ function ProductDetails({ dispatch }) {
                     ))}
                 </div>
             </section>
+
             <section className="product-reviews-section">
                 <h2>Customer Reviews</h2>
                 <div className="reviews-list">
@@ -139,8 +156,8 @@ function ProductDetails({ dispatch }) {
                     ))}
                 </div>
             </section>
-        </div>
-    )
+        </>
+    );
 }
 
 export default ProductDetails

@@ -1,15 +1,22 @@
-import {useState, useEffect} from "react";
-import {setItem, getItem} from'../utils/localstorage.jsx'
-export default function Practice(){
+import {createContext} from "react"; //import
+import Theme from "./Theme";
+
+const ThemeContext = createContext(); //initialization
+
+export default function Practice({children}) {
     
-  
+    const theme = "Light";
     return (
         <>
-            
+        
+            <ThemeContext.Provider value={theme}>
+                <Theme />
+                {children}
+            </ThemeContext.Provider>
         </>
 
     );
 }
-
+export {ThemeContext};
    
 

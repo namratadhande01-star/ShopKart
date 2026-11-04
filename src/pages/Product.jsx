@@ -1,173 +1,21 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import "./Product.css";
-import { useParams } from "react-router-dom";
+import { ShopKartContext } from "../Context/ShopKartContext";
 
 
-const products = [
-  {
-    id: 1,
-    name: "Samsung Galaxy M14 5G",
-    category: "Electronics",
-    price: "12,499",
-    originalPrice: "14,999",
-    rating: 4.4,
-    reviews: 1850,
-    discount: "17%",
-    isAvailable: true,
-    image: "/images/products/Samsung_phone.png"
-  },
-
-  {
-    id: 2,
-    name: "Puma Running Shoes",
-    category: "Fashion",
-    price: "2,499",
-    originalPrice: "3,999",
-    rating: 3.8,
-    reviews: 1320,
-    discount: "38%",
-    isAvailable: true,
-    image: "/images/products/puma_shoes.png"
-  },
-
-  {
-    id: 3,
-    name: "Amazon Echo Dot",
-    category: "Electronics",
-    price: "3,499",
-    originalPrice: "4,499",
-    rating: 4.6,
-    reviews: 2450,
-    discount: "22%",
-    isAvailable: true,
-    image: "/images/products/amazon_echo_dot.png"
-  },
-
-  {
-    id: 4,
-    name: "American Tourister Trolley Bag",
-    category: "Fashion",
-    price: "3,299",
-    originalPrice: "4,999",
-    rating: 2.9,
-    reviews: 970,
-    discount: "34%",
-    isAvailable: false,
-    image: "/images/products/trolley-bag..png"
-  },
-
-  {
-    id: 5,
-    name: "HP Wireless Keyboard",
-    category: "Electronics",
-    price: "899",
-    originalPrice: "1,299",
-    rating: 4.2,
-    reviews: 760,
-    discount: "31%",
-    isAvailable: true,
-    image: "/images/products/keyboard.png"
-  },
-
-  {
-    id: 6,
-    name: "Milton Thermosteel Bottle",
-    category: "Home & Kitchen",
-    price: "799",
-    originalPrice: "1,099",
-    rating: 3.5,
-    reviews: 1540,
-    discount: "27%",
-    isAvailable: true,
-    image: "/images/products/thermos-bottle.png"
-  },
-
-  {
-    id: 7,
-    name: "Maybelline Lipstick Set",
-    category: "Beauty",
-    price: "399",
-    originalPrice: "749",
-    rating: 5,
-    reviews: 820,
-    discount: "22%",
-    isAvailable: true,
-    image: "/images/products/lipstick-set.png"
-  },
-
-  {
-    id: 8,
-    name: "Levi's Casual Jeans",
-    category: "Fashion",
-    price: "1,899",
-    originalPrice: "2,999",
-    rating: 4.6,
-    reviews: 2100,
-    discount: "37%",
-    isAvailable: true,
-    image: "/images/products/jeans-1.png"
-  },
-
-  {
-    id: 9,
-    name: "Bajaj Mixer Grinder",
-    category: "Home & Kitchen",
-    price: "2,799",
-    originalPrice: "3,499",
-    rating: 2.4,
-    reviews: 690,
-    discount: "20%",
-    isAvailable: false,
-    image: "/images/products/mixer-grinder.png"
-  },
-
-  {
-    id: 10,
-    name: "Canon Inkjet Printer",
-    category: "Electronics",
-    price: "5,499",
-    originalPrice: "6,499",
-    rating: 3.2,
-    reviews: 540,
-    discount: "15%",
-    isAvailable: true,
-    image: "/images/products/printer.png"
-  },
-
-  {
-    id: 11,
-    name: "Nivea Skincare Combo",
-    category: "Beauty",
-    price: "599",
-    originalPrice: "799",
-    rating: 4.5,
-    reviews: 1280,
-    discount: "25%",
-    isAvailable: true,
-    image: "/images/products/skincare-combo.png"
-  },
-
-  {
-    id: 12,
-    name: "Cello Non-Stick Pan",
-    category: "Home & Kitchen",
-    price: "999",
-    originalPrice: "1,399",
-    rating: 2.8,
-    reviews: 475,
-    discount: "29%",
-    isAvailable: true,
-    image: "/images/products/nonstick-pan.png"
-  }
-];
-
-function Product({ dispatch }) {
+function Product() {
+  const { products, dispatch, loading, error } = useContext(ShopKartContext);
   const [selectedCategories, setSelectedCategories] = useState([]);
-  const [maxPrice, setMaxPrice] = useState(20000);
+  const [maxPrice, setMaxPrice] = useState(150000);
   const [selectedRating, setSelectedRating] = useState(0);
   const [availability, setAvailability] = useState("");
-  const { fname, lname } = useParams();
+  const navigate = useNavigate();
+  const [addedProductId, setAddedProductId] = useState(null);
+  const [sortOption, setSortOption] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const productsPerPage = 8;
+
 
   const handleCategoryChange = (category) => {
     if (selectedCategories.includes(category)) {
@@ -179,16 +27,26 @@ function Product({ dispatch }) {
   };
 
   const handleRatingChange = (rating) => {
-    setSelectedRating(rating);
+    if (selectedRating === rating) {
+      setSelectedRating(0);
+    } else {
+      setSelectedRating(rating);
+    }
   };
 
+
   const handleAvailabilityChange = (value) => {
-    setAvailability(value);
+    if (availability === value) {
+      setAvailability("");
+    } else {
+      setAvailability(value);
+    }
   };
+
 
   const clearFilters = () => {
     setSelectedCategories([]);
-    setMaxPrice(20000);
+    setMaxPrice(150000);
     setSelectedRating(0);
     setAvailability("");
   };
@@ -198,13 +56,13 @@ function Product({ dispatch }) {
       selectedCategories.length === 0 ||
       selectedCategories.includes(product.category);
     const priceMatch =
-      Number(product.price.replace(",", "")) <= maxPrice;
+      product.price <= maxPrice;
     const ratingMatch =
       product.rating >= selectedRating;
     const availabilityMatch =
       availability === "" ||
-      (availability === "inStock" && product.isAvailable) ||
-      (availability === "outOfStock" && !product.isAvailable);
+      (availability === "inStock" && product.availability === "In Stock") ||
+      (availability === "outOfStock" && product.availability === "Out of Stock");
 
     return (
       categoryMatch &&
@@ -214,6 +72,68 @@ function Product({ dispatch }) {
     );
   });
 
+
+  let sortedProducts = [...filteredProducts];
+  if (sortOption === "price-low") {
+    sortedProducts.sort(
+      (a, b) => a.price - b.price
+    );
+  }
+
+
+  if (sortOption === "price-high") {
+    sortedProducts.sort(
+      (a, b) => b.price - a.price
+    );
+  }
+
+  if (sortOption === "rating-high") {
+    sortedProducts.sort((a, b) => b.rating - a.rating);
+  }
+
+  if (sortOption === "rating-low") {
+    sortedProducts.sort((a, b) => a.rating - b.rating);
+  }
+
+  if (sortOption === "popular") {
+    sortedProducts.sort(
+      (a, b) => b.reviews - a.reviews
+    );
+  }
+
+
+  const totalPages = Math.ceil(sortedProducts.length / productsPerPage);
+  const startIndex = (currentPage - 1) * productsPerPage;
+  const endIndex = startIndex + productsPerPage;
+  const currentProducts = sortedProducts.slice(startIndex, endIndex);
+  useEffect(() => { setCurrentPage(1); }, [sortOption]);
+  useEffect(() => { setCurrentPage(1); }, [selectedCategories, maxPrice, selectedRating, availability]);
+
+
+  if (loading) {
+    return (
+      <div className="loading-message">
+        <div className="loading-spinner"></div>
+        <h2>Loading Products</h2>
+        <p>Please wait while we fetch the latest products...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="error-message">
+        <div className="error-icon">!</div>
+        <h2>Oops! Something went wrong</h2>
+        <p>{error}</p>
+        <button onClick={() => window.location.reload()}>
+          Try Again
+        </button>
+      </div>
+    );
+  }
+
+
   return (
     <>
 
@@ -221,13 +141,13 @@ function Product({ dispatch }) {
         <section className="products-banner">
           <div className="banner-content">
             <h1> All <span>Products</span> </h1>
-            <h1>Hello {fname} {lname}</h1>
             <p> Explore our wide range of top quality products </p>
           </div>
         </section>
 
         <section className="products-content">
           <aside className="filter-sidebar">
+
             <div className="filter-title">
               <h3>FILTERS</h3>
               <button onClick={clearFilters}>Clear All</button>
@@ -284,7 +204,7 @@ function Product({ dispatch }) {
               <input
                 type="range"
                 min="199"
-                max="20000"
+                max="150000"
                 value={maxPrice}
                 onChange={(e) => setMaxPrice(Number(e.target.value))}
               />
@@ -319,6 +239,8 @@ function Product({ dispatch }) {
               </label>
             </div>
 
+
+
             <div className="filter-group">
               <h4>Availability</h4>
               <label>
@@ -341,46 +263,116 @@ function Product({ dispatch }) {
           <div className="products-area">
             <div className="products-header">
               <p>Showing {filteredProducts.length} of {products.length} products</p>
+
+              <div className="sort-section">
+                <label htmlFor="sort">Sort By:</label>
+
+                <select
+                  id="sort"
+                  value={sortOption}
+                  onChange={(e) => setSortOption(e.target.value)}
+                >
+                  <option value="">Default</option>
+                  <option value="price-low">Price: Low to High</option>
+                  <option value="price-high">Price: High to Low</option>
+                  <option value="rating-high">Rating: High to Low</option>
+                  <option value="rating-low">Rating: Low to High</option>
+                  <option value="popular">Most Popular</option>
+                </select>
+              </div>
             </div>
 
+
             <div className="products-grid">
-              {filteredProducts.length > 0 ? (
-                filteredProducts.map((product) => (
-                  <div className="product-card" key={product.id}>
-                    <div className="product-image">
+              {sortedProducts.length > 0 ? (
+                currentProducts.map((product) => (
+                  <div className="product-card" key={product.id} title="Click for more info">
+
+                    <div
+                      className="product-image"
+                      onClick={() => navigate(`/product/${product.id}`)} >
                       {product.discount && (
-                        <span className="discount-badge">-{product.discount}</span>
+                        <span className="discount-badge"> -{product.discount} </span>
                       )}
-                      <button className="wishlist-button">♡</button>
+                      <button className="wishlist-button" onClick={(e) => e.stopPropagation()} >
+                        ♡
+                      </button>
+
                       <img src={product.image} alt={product.name} />
                     </div>
-                    <div className="product-info">
+
+                    <div className="product-info" onClick={() => navigate(`/product/${product.id}`)}>
                       <small>{product.category}</small>
+
                       <h3>{product.name}</h3>
+
                       <div className="rating">
-                        ⭐ {product.rating}
-                        <span> ({product.reviews})</span>
+                        ⭐ {product.rating} <span>({product.reviews})</span>
                       </div>
+
                       <div className="product-price">
-                        ₹{product.price}
-                        <del>₹{product.originalPrice}</del>
+                        ₹{product.price.toLocaleString("en-IN")} <del>₹{product.originalPrice.toLocaleString("en-IN")}</del>
                       </div>
-                      import {useNavigate} from "react-router-dom";
+
+                      <button
+                        className="add-cart-button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+
+                          dispatch({
+                            type: "ADD_ITEM",
+                            payload: product
+                          });
+                          setAddedProductId(product.id);
+
+                          setTimeout(() => {
+                            setAddedProductId(null);
+                          }, 2000);
+                        }}
+                      >
+                        {addedProductId === product.id ? (
+                          <>✓ Added to Cart</>
+                        ) : (
+                          <>🛒 Add to Cart</>
+                        )}
+                      </button>
                     </div>
                   </div>
                 ))
               ) : (
+
                 <div className="no-products">
                   <h3>No Products Found !</h3>
                   <p>Try changing your filters.</p>
                 </div>
               )}
             </div>
+
+            {totalPages > 1 && (
+              <div className="pagination">
+                <button onClick={() => setCurrentPage((previous) => Math.max(previous - 1, 1))}
+                  disabled={currentPage === 1}> ← </button>
+                {Array.from({ length: totalPages }, (_, index) => (
+                  <button key={index + 1} className={currentPage === index + 1 ? "active" : ""}
+                    onClick={() => setCurrentPage(index + 1)}>
+                    {index + 1}
+                  </button>
+                ))}
+
+
+                <button onClick={() => setCurrentPage((previous) =>
+                  Math.min(previous + 1, totalPages))}
+                  disabled={currentPage === totalPages}>
+                  →
+                </button>
+              </div>
+            )}
           </div>
         </section>
       </main>
     </>
   );
+
 }
 
 export default Product;
